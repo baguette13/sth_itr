@@ -21,6 +21,12 @@ public:
     void handleAttachAccept() override;
     void handleAttachReject() override;
     virtual void handleDisconnected();
+    void handleSms(common::PhoneNumber from, const std::string& text) override;
+    
+    // IUserEventsHandler interface
+    void handleHomeClicked() override;
+    void handleSmsComposeClicked() override;
+    void handleSmsViewClicked() override;
 
 protected:
     Context& context;

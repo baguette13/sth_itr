@@ -104,4 +104,18 @@ TEST_F(BtsPortTestSuite, shallHandleDisconnected)
     disconnectedCallback();
 }
 
+TEST_F(BtsPortTestSuite, shallHandleSmsMessage)
+{
+    const common::PhoneNumber SENDER_NUMBER{123};
+    const std::string SMS_TEXT = "Hello, this is a test message!";
+    
+    EXPECT_CALL(handlerMock, handleSms(SENDER_NUMBER, SMS_TEXT));
+    
+    common::OutgoingMessage msg{common::MessageId::Sms,
+                               SENDER_NUMBER,
+                               PHONE_NUMBER};
+    msg.writeText(SMS_TEXT);
+    messageCallback(msg.getMessage());
+}
+
 }

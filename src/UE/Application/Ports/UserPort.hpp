@@ -18,12 +18,18 @@ public:
     void showNotConnected() override;
     void showConnecting() override;
     void showConnected() override;
+    void showNewSms(bool present) override;
+    void showSmsListView() override;
+    void showSmsComposerView() override;
+    IUeGui::IListViewMode& getListViewMode() override;
 
 private:
     common::PrefixedLogger logger;
     IUeGui& gui;
     common::PhoneNumber phoneNumber;
     IUserEventsHandler* handler = nullptr;
+    
+    void setMenuCallback();
 };
 
 }
