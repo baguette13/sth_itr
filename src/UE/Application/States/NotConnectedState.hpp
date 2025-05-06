@@ -13,6 +13,7 @@ public:
     // IBtsEventsHandler interface
 public:
     void handleSib(common::BtsId btsId) override;
+    void handleDisconnected() override;
 };
 
 }

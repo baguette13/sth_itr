@@ -13,6 +13,7 @@ public:
     // IBtsEventsHandler interface
     void handleAttachAccept() override;
     void handleAttachReject() override;
+    void handleDisconnected() override;
 
     // ITimerEventsHandler interface
     void handleTimeout() override;

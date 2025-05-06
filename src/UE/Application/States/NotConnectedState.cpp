@@ -18,4 +18,10 @@ void NotConnectedState::handleSib(common::BtsId btsId)
     context.setState<ConnectingState>();
 }
 
+void NotConnectedState::handleDisconnected()
+{
+    logger.logDebug("Already disconnected");
+    // UE is already in NotConnected state, do nothing further.
+}
+
 }
