@@ -70,6 +70,26 @@ IUeGui::IListViewMode& UserPort::getListViewMode()
     return gui.setListViewMode();
 }
 
+IUeGui::ISmsComposeMode& UserPort::getSmsComposeMode()
+{
+    return gui.setSmsComposeMode();
+}
+
+IUeGui::ITextMode& UserPort::showViewTextMode()
+{
+    return gui.setViewTextMode();
+}
+
+void UserPort::setAcceptCallback(IUeGui::Callback callback)
+{
+    gui.setAcceptCallback(callback);
+}
+
+void UserPort::setRejectCallback(IUeGui::Callback callback)
+{
+    gui.setRejectCallback(callback);
+}
+
 void UserPort::setMenuCallback()
 {
     gui.setAcceptCallback([this]() {

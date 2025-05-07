@@ -17,14 +17,16 @@ protected:
     const common::PhoneNumber PHONE_NUMBER{112};
     NiceMock<common::ILoggerMock> loggerMock;
     StrictMock<IUserEventsHandlerMock> handlerMock;
-    StrictMock<IUeGuiMock> guiMock;
+    NiceMock<IUeGuiMock> guiMock;
     StrictMock<IListViewModeMock> listViewModeMock;
+    StrictMock<ISmsComposeModeMock> smsComposeModeMock;
 
     UserPort objectUnderTest{loggerMock, guiMock, PHONE_NUMBER};
 
     UserPortTestSuite()
     {
         EXPECT_CALL(guiMock, setTitle(HasSubstr(to_string(PHONE_NUMBER))));
+        EXPECT_CALL(guiMock, setRejectCallback(_));
         objectUnderTest.start(handlerMock);
     }
     ~UserPortTestSuite()
@@ -54,7 +56,14 @@ TEST_F(UserPortTestSuite, shallShowMenuOnConnected)
     EXPECT_CALL(guiMock, setListViewMode()).WillOnce(ReturnRef(listViewModeMock));
     EXPECT_CALL(listViewModeMock, clearSelectionList());
     EXPECT_CALL(listViewModeMock, addSelectionListItem(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(guiMock, setAcceptCallback(_));
     objectUnderTest.showConnected();
+}
+
+TEST_F(UserPortTestSuite, shallReturnSmsComposeMode)
+{
+    EXPECT_CALL(guiMock, setSmsComposeMode()).WillOnce(ReturnRef(smsComposeModeMock));
+    EXPECT_EQ(&smsComposeModeMock, &objectUnderTest.getSmsComposeMode());
 }
 
 }

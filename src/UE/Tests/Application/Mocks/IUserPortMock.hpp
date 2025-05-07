@@ -32,6 +32,8 @@ public:
     MOCK_METHOD(void, showSmsListView, (), (final));
     MOCK_METHOD(void, showSmsComposerView, (), (final));
     MOCK_METHOD(IUeGui::IListViewMode&, getListViewMode, (), (final));
+    MOCK_METHOD(IUeGui::ISmsComposeMode&, getSmsComposeMode, (), (final));
+    MOCK_METHOD(void, setAcceptCallback, (IUeGui::Callback), (final));
 };
 
 }

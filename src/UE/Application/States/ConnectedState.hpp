@@ -24,9 +24,12 @@ private:
     void showMenuView();
     void showSmsListView();
     void showSmsComposerView();
+    void showSmsView(const SmsMessage& message);
+    void handleSmsSend();
     void refreshMessageIndicator();
     
     SmsDb smsDb;
+    std::vector<SmsMessage> currentMessagesList;
 };
 
 }
