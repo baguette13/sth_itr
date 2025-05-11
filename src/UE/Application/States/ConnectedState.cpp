@@ -1,6 +1,7 @@
 #include "ConnectedState.hpp"
 #include "NotConnectedState.hpp"
 #include "ReceivingCallState.hpp"
+#include "DiallingState.hpp"
 
 namespace ue
 {
@@ -9,6 +10,7 @@ ConnectedState::ConnectedState(Context &context)
     : BaseState(context, "ConnectedState")
 {
     context.user.showConnected();
+    showMenuView(); // Show the menu with options including "Dial"
 }
 
 void ConnectedState::handleDisconnected()
@@ -46,9 +48,42 @@ void ConnectedState::handleSmsViewClicked()
     showSmsListView();
 }
 
+void ConnectedState::handleDialClicked()
+{
+    logger.logInfo("Dial clicked - transitioning to dialing state");
+    context.setState<DiallingState>();
+}
+
 void ConnectedState::showMenuView()
 {
     context.user.showConnected();
+    
+    // Create menu with options
+    auto& listView = context.user.getListViewMode();
+    listView.clearSelectionList();
+    listView.addSelectionListItem("Compose SMS", "Create a new SMS message");
+    listView.addSelectionListItem("View SMS", "View received messages");
+    listView.addSelectionListItem("Dial", "Make a call");
+    
+    // Set callback for when a menu item is selected
+    context.user.setAcceptCallback([this]() {
+        auto selectedItem = context.user.getListViewMode().getCurrentItemIndex();
+        if (selectedItem.first) {
+            switch (selectedItem.second) {
+                case 0:  // Compose SMS
+                    handleSmsComposeClicked();
+                    break;
+                case 1:  // View SMS
+                    handleSmsViewClicked();
+                    break;
+                case 2:  // Dial
+                    handleDialClicked();
+                    break;
+                default:
+                    break;
+            }
+        }
+    });
 }
 
 void ConnectedState::showSmsListView()

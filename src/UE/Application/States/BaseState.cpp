@@ -65,6 +65,11 @@ void BaseState::handleCallTalk(common::PhoneNumber from, const std::string& text
     logger.logError("Unexpected: handleCallTalk from ", from);
 }
 
+void BaseState::handleUnknownRecipient()
+{
+    logger.logError("Unexpected: handleUnknownRecipient");
+}
+
 void BaseState::handleHomeClicked()
 {
     logger.logError("Unexpected: handleHomeClicked");

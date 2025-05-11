@@ -71,6 +71,11 @@ void Application::handleCallTalk(common::PhoneNumber from, const std::string& te
     context.state->handleCallTalk(from, text);
 }
 
+void Application::handleUnknownRecipient()
+{
+    context.state->handleUnknownRecipient();
+}
+
 void Application::handleHomeClicked()
 {
     context.state->handleHomeClicked();

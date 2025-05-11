@@ -148,7 +148,7 @@ TEST_F(TalkingStateTestSuite, shallHandleReceivedCallTalkMessages)
 TEST_F(TalkingStateTestSuite, shallIgnoreCallTalkFromWrongNumber)
 {
     // given
-    const common::PhoneNumber WRONG_NUMBER{456};
+    const common::PhoneNumber WRONG_NUMBER{200}; // Changed from 456 to avoid narrowing conversion
     const std::string RECEIVED_TEXT = "Can you hear me?";
     TalkingState objectUnderTest{context, PEER_NUMBER};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
@@ -182,7 +182,7 @@ TEST_F(TalkingStateTestSuite, shallHandleCallDroppedFromPeer)
 TEST_F(TalkingStateTestSuite, shallIgnoreCallDroppedFromWrongNumber)
 {
     // given
-    const common::PhoneNumber WRONG_NUMBER{456};
+    const common::PhoneNumber WRONG_NUMBER{200}; // Changed from 456 to avoid narrowing conversion
     TalkingState objectUnderTest{context, PEER_NUMBER};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
     

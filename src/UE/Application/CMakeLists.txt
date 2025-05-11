@@ -9,7 +9,7 @@ aux_source_directory(States SRC_LIST)
 set(SRC_LIST ${SRC_LIST} SmsDb.cpp)
 
 # Add our new state files explicitly
-set(SRC_LIST ${SRC_LIST} States/ReceivingCallState.cpp States/TalkingState.cpp)
+set(SRC_LIST ${SRC_LIST} States/ReceivingCallState.cpp States/TalkingState.cpp States/DiallingState.cpp)
 
 add_library(${PROJECT_NAME} ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} Common)

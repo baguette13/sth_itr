@@ -20,6 +20,7 @@ public:
     void handleHomeClicked() override;
     void handleSmsComposeClicked() override;
     void handleSmsViewClicked() override;
+    void handleDialClicked();
     
 private:
     void showMenuView();

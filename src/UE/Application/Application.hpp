@@ -34,6 +34,7 @@ public:
     void handleCallAccepted(common::PhoneNumber from) override;
     void handleCallDropped(common::PhoneNumber from) override;
     void handleCallTalk(common::PhoneNumber from, const std::string& text) override;
+    void handleUnknownRecipient() override;
 
     // IUserEventsHandler interface
     void handleHomeClicked() override;
