@@ -27,16 +27,16 @@ DiallingState::~DiallingState()
 
 void DiallingState::showDialView()
 {
+    // Display dialing instructions in the text mode
+    auto& textMode = context.user.showViewTextMode();
+    textMode.setText("Enter phone number to call\nThen press green button to dial");
+    
     // Get the call mode interface from the user port
     auto& callMode = context.user.setCallMode();
     
     // Clear any previous text in the call mode fields
     callMode.clearIncomingText();
     callMode.clearOutgoingText();
-    
-    // Display instructions in the incoming text area (which is read-only)
-    // This makes it clear how to use the dialing interface
-    callMode.appendIncomingText("Enter phone number below\nThen press green button to dial");
     
     // Set accept callback (green button) - this will send the call request
     context.user.setAcceptCallback([this]() {

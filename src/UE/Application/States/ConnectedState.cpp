@@ -9,8 +9,9 @@ namespace ue
 ConnectedState::ConnectedState(Context &context)
     : BaseState(context, "ConnectedState")
 {
-    context.user.showConnected();
-    showMenuView(); // Show the menu with options including "Dial"
+    // We need to call either showConnected or showMenuView, but not both
+    // since showMenuView already calls showConnected internally
+    showMenuView();
 }
 
 void ConnectedState::handleDisconnected()

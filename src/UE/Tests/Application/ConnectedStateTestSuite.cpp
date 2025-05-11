@@ -119,13 +119,16 @@ TEST_F(ConnectedStateTestSuite, shallTransitionToDiallingStateWhenDialClicked)
     // These expectations are needed because ConnectedState will transition to DiallingState
     // which will call these methods in its constructor
     NiceMock<ICallModeMock> callModeMock;
+    NiceMock<ITextModeMock> textModeMock;
     ON_CALL(userPortMock, setCallMode()).WillByDefault(ReturnRef(callModeMock));
+    ON_CALL(userPortMock, showViewTextMode()).WillByDefault(ReturnRef(textModeMock));
     
     // expect for DiallingState constructor
     EXPECT_CALL(userPortMock, setCallMode());
-    EXPECT_CALL(userPortMock, showViewTextMode());
     EXPECT_CALL(callModeMock, clearIncomingText());
     EXPECT_CALL(callModeMock, clearOutgoingText());
+    EXPECT_CALL(userPortMock, showViewTextMode());
+    EXPECT_CALL(textModeMock, setText(_));
     EXPECT_CALL(userPortMock, setAcceptCallback(_));
     EXPECT_CALL(userPortMock, setRejectCallback(_));
     EXPECT_CALL(timerPortMock, startTimer(_));
@@ -136,10 +139,6 @@ TEST_F(ConnectedStateTestSuite, shallTransitionToDiallingStateWhenDialClicked)
     
     // when - selecting "Dial" from menu
     acceptCallback();
-    
-    // Transition to DiallingState happens in the implementation
-    // We can't directly verify the state change in this test structure,
-    // but the implementation should call context.setState<DiallingState>()
 }
 
 }

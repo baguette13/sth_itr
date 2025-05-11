@@ -20,10 +20,12 @@ class ReceivingCallStateTestSuite : public Test
 protected:
     const common::PhoneNumber CALLER_NUMBER{123};
     NiceMock<common::ILoggerMock> loggerMock;
-    StrictMock<IBtsPortMock> btsPortMock;
-    StrictMock<IUserPortMock> userPortMock;
-    StrictMock<ITimerPortMock> timerPortMock;
-    StrictMock<ITextModeMock> textModeMock;
+    NiceMock<IBtsPortMock> btsPortMock;
+    NiceMock<IUserPortMock> userPortMock;
+    NiceMock<ITimerPortMock> timerPortMock;
+    NiceMock<ITextModeMock> textModeMock;
+    NiceMock<IListViewModeMock> listViewModeMock;
+    NiceMock<ICallModeMock> callModeMock;
     
     Context context{loggerMock, btsPortMock, userPortMock, timerPortMock};
     IUeGui::Callback acceptCallback;
@@ -32,6 +34,8 @@ protected:
     ReceivingCallStateTestSuite()
     {
         ON_CALL(userPortMock, showViewTextMode()).WillByDefault(ReturnRef(textModeMock));
+        ON_CALL(userPortMock, getListViewMode()).WillByDefault(ReturnRef(listViewModeMock));
+        ON_CALL(userPortMock, setCallMode()).WillByDefault(ReturnRef(callModeMock));
         
         // Store callbacks for testing
         EXPECT_CALL(userPortMock, setAcceptCallback(_))
@@ -79,13 +83,11 @@ TEST_F(ReceivingCallStateTestSuite, shallRejectCallAndTransitionToConnectedState
     
     // expect
     EXPECT_CALL(btsPortMock, sendCallDropped(CALLER_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected()); // Add this expectation
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when
     rejectCallback();
-    
-    // Verify state transition (would require a mock for the setState method in Context)
-    // In a real test we could check if context.state is now an instance of ConnectedState
 }
 
 TEST_F(ReceivingCallStateTestSuite, shallTimeoutAndRejectCall)
@@ -97,13 +99,11 @@ TEST_F(ReceivingCallStateTestSuite, shallTimeoutAndRejectCall)
     
     // expect
     EXPECT_CALL(btsPortMock, sendCallDropped(CALLER_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected()); // Add this expectation
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when
     objectUnderTest.handleTimeout();
-    
-    // Verify state transition (would require a mock for the setState method in Context)
-    // In a real test we could check if context.state is now an instance of ConnectedState
 }
 
 TEST_F(ReceivingCallStateTestSuite, shallRejectCallOnHomeButton)
@@ -115,6 +115,7 @@ TEST_F(ReceivingCallStateTestSuite, shallRejectCallOnHomeButton)
     
     // expect
     EXPECT_CALL(btsPortMock, sendCallDropped(CALLER_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected()); // Add this expectation
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when

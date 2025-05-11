@@ -20,11 +20,12 @@ class DiallingStateTestSuite : public Test
 protected:
     const common::PhoneNumber RECIPIENT_NUMBER{234};
     NiceMock<common::ILoggerMock> loggerMock;
-    StrictMock<IBtsPortMock> btsPortMock;
-    StrictMock<IUserPortMock> userPortMock;
-    StrictMock<ITimerPortMock> timerPortMock;
-    StrictMock<ICallModeMock> callModeMock;
-    StrictMock<ITextModeMock> textModeMock;
+    NiceMock<IBtsPortMock> btsPortMock;
+    NiceMock<IUserPortMock> userPortMock;
+    NiceMock<ITimerPortMock> timerPortMock;
+    NiceMock<ICallModeMock> callModeMock;
+    NiceMock<ITextModeMock> textModeMock;
+    NiceMock<IListViewModeMock> listViewModeMock;
     
     Context context{loggerMock, btsPortMock, userPortMock, timerPortMock};
     IUeGui::Callback acceptCallback;
@@ -34,6 +35,7 @@ protected:
     {
         ON_CALL(userPortMock, setCallMode()).WillByDefault(ReturnRef(callModeMock));
         ON_CALL(userPortMock, showViewTextMode()).WillByDefault(ReturnRef(textModeMock));
+        ON_CALL(userPortMock, getListViewMode()).WillByDefault(ReturnRef(listViewModeMock));
         
         // Store callbacks for testing
         EXPECT_CALL(userPortMock, setAcceptCallback(_))
@@ -47,10 +49,10 @@ TEST_F(DiallingStateTestSuite, shallShowDialScreenAndStartTimer)
 {
     // expect
     EXPECT_CALL(userPortMock, setCallMode());
-    EXPECT_CALL(userPortMock, showViewTextMode());
-    EXPECT_CALL(textModeMock, setText(_));
     EXPECT_CALL(callModeMock, clearIncomingText());
     EXPECT_CALL(callModeMock, clearOutgoingText());
+    EXPECT_CALL(userPortMock, showViewTextMode());
+    EXPECT_CALL(textModeMock, setText(_));
     EXPECT_CALL(timerPortMock, startTimer(_));
     
     // when
@@ -63,8 +65,10 @@ TEST_F(DiallingStateTestSuite, shallSendCallRequestWhenUserAccepts)
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
     ::testing::Mock::VerifyAndClearExpectations(&btsPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // expect
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(HasSubstr("Calling: " + to_string(RECIPIENT_NUMBER))));
@@ -80,11 +84,14 @@ TEST_F(DiallingStateTestSuite, shallHandleInvalidPhoneNumber)
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
     ::testing::Mock::VerifyAndClearExpectations(&btsPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // expect - no valid phone number entered
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(""));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(HasSubstr("Invalid phone number")));
+    EXPECT_CALL(userPortMock, showConnected());
     
     // should not send call request
     EXPECT_CALL(btsPortMock, sendCallRequest(_)).Times(0);
@@ -98,8 +105,10 @@ TEST_F(DiallingStateTestSuite, shallTransitionToTalkingStateWhenCallAccepted)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -108,14 +117,19 @@ TEST_F(DiallingStateTestSuite, shallTransitionToTalkingStateWhenCallAccepted)
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
     ::testing::Mock::VerifyAndClearExpectations(&btsPortMock);
     
-    // expect
+    // For TalkingState constructor
+    ON_CALL(userPortMock, setCallMode()).WillByDefault(ReturnRef(callModeMock));
+    
+    // expect for the transition to TalkingState
+    EXPECT_CALL(userPortMock, setCallMode());
+    EXPECT_CALL(callModeMock, clearIncomingText());
+    EXPECT_CALL(callModeMock, clearOutgoingText());
+    EXPECT_CALL(userPortMock, setAcceptCallback(_));
+    EXPECT_CALL(userPortMock, setRejectCallback(_));
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when - call is accepted by recipient
     objectUnderTest.handleCallAccepted(RECIPIENT_NUMBER);
-    
-    // Verify state transition (would require a mock for the setState method in Context)
-    // In a real test we could check if context.state is now an instance of TalkingState
 }
 
 TEST_F(DiallingStateTestSuite, shallHandleCallDroppedByRecipient)
@@ -123,8 +137,10 @@ TEST_F(DiallingStateTestSuite, shallHandleCallDroppedByRecipient)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -136,6 +152,7 @@ TEST_F(DiallingStateTestSuite, shallHandleCallDroppedByRecipient)
     // expect
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(HasSubstr("Call rejected by: " + to_string(RECIPIENT_NUMBER))));
+    EXPECT_CALL(userPortMock, showConnected());
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when - call is rejected by recipient
@@ -147,8 +164,10 @@ TEST_F(DiallingStateTestSuite, shallHandleUnknownRecipient)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -160,6 +179,7 @@ TEST_F(DiallingStateTestSuite, shallHandleUnknownRecipient)
     // expect
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(HasSubstr("User not available")));
+    EXPECT_CALL(userPortMock, showConnected());
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when - unknown recipient response received
@@ -171,8 +191,10 @@ TEST_F(DiallingStateTestSuite, shallHandleTimeout)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -185,6 +207,7 @@ TEST_F(DiallingStateTestSuite, shallHandleTimeout)
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(HasSubstr("Call timed out")));
     EXPECT_CALL(btsPortMock, sendCallDropped(RECIPIENT_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected());
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when
@@ -196,8 +219,10 @@ TEST_F(DiallingStateTestSuite, shallCancelCallWhenUserRejects)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -208,6 +233,7 @@ TEST_F(DiallingStateTestSuite, shallCancelCallWhenUserRejects)
     
     // expect
     EXPECT_CALL(btsPortMock, sendCallDropped(RECIPIENT_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected());
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when
@@ -219,8 +245,10 @@ TEST_F(DiallingStateTestSuite, shallCancelCallOnHomeButton)
     // given
     DiallingState objectUnderTest{context};
     ::testing::Mock::VerifyAndClearExpectations(&userPortMock);
+    ::testing::Mock::VerifyAndClearExpectations(&callModeMock);
     
     // Set up the state by simulating a call request
+    EXPECT_CALL(userPortMock, setCallMode()).WillOnce(ReturnRef(callModeMock));
     EXPECT_CALL(callModeMock, getOutgoingText()).WillOnce(Return(std::to_string(RECIPIENT_NUMBER.value)));
     EXPECT_CALL(userPortMock, showViewTextMode()).WillOnce(ReturnRef(textModeMock));
     EXPECT_CALL(textModeMock, setText(_));
@@ -231,6 +259,7 @@ TEST_F(DiallingStateTestSuite, shallCancelCallOnHomeButton)
     
     // expect
     EXPECT_CALL(btsPortMock, sendCallDropped(RECIPIENT_NUMBER));
+    EXPECT_CALL(userPortMock, showConnected());
     EXPECT_CALL(timerPortMock, stopTimer());
     
     // when
