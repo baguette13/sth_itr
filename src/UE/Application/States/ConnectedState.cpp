@@ -1,5 +1,6 @@
 #include "ConnectedState.hpp"
 #include "NotConnectedState.hpp"
+#include "ReceivingCallState.hpp"
 
 namespace ue
 {
@@ -20,6 +21,14 @@ void ConnectedState::handleSms(common::PhoneNumber from, const std::string& text
     logger.logInfo("Received SMS from: ", from, ", text: ", text);
     smsDb.addSms(from, text);
     refreshMessageIndicator();
+}
+
+void ConnectedState::handleCallRequest(common::PhoneNumber from)
+{
+    logger.logInfo("Received call request from: ", from);
+    // Create a new PhoneNumber by value to ensure it's passed by value
+    common::PhoneNumber caller = from;
+    context.setState<ReceivingCallState>(caller);
 }
 
 void ConnectedState::handleHomeClicked()

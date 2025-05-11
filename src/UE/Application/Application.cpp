@@ -51,6 +51,26 @@ void Application::handleSms(common::PhoneNumber from, const std::string& text)
     context.state->handleSms(from, text);
 }
 
+void Application::handleCallRequest(common::PhoneNumber from)
+{
+    context.state->handleCallRequest(from);
+}
+
+void Application::handleCallAccepted(common::PhoneNumber from)
+{
+    context.state->handleCallAccepted(from);
+}
+
+void Application::handleCallDropped(common::PhoneNumber from)
+{
+    context.state->handleCallDropped(from);
+}
+
+void Application::handleCallTalk(common::PhoneNumber from, const std::string& text)
+{
+    context.state->handleCallTalk(from, text);
+}
+
 void Application::handleHomeClicked()
 {
     context.state->handleHomeClicked();

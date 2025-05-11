@@ -3,6 +3,7 @@
 #include "UeGui/IListViewMode.hpp"
 #include "UeGui/ISmsComposeMode.hpp"
 #include "UeGui/ITextMode.hpp"
+#include "UeGui/ICallMode.hpp"
 
 namespace ue
 {
@@ -31,6 +32,7 @@ public:
     virtual IUeGui::IListViewMode& getListViewMode() = 0;
     virtual IUeGui::ISmsComposeMode& getSmsComposeMode() = 0;
     virtual IUeGui::ITextMode& showViewTextMode() = 0;
+    virtual IUeGui::ICallMode& setCallMode() = 0;
     virtual void setAcceptCallback(IUeGui::Callback) = 0;
     virtual void setRejectCallback(IUeGui::Callback) = 0;
 };

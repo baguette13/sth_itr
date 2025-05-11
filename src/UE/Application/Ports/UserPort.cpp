@@ -80,6 +80,11 @@ IUeGui::ITextMode& UserPort::showViewTextMode()
     return gui.setViewTextMode();
 }
 
+IUeGui::ICallMode& UserPort::setCallMode()
+{
+    return gui.setCallMode();
+}
+
 void UserPort::setAcceptCallback(IUeGui::Callback callback)
 {
     gui.setAcceptCallback(callback);

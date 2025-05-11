@@ -24,6 +24,7 @@ public:
     IUeGui::IListViewMode& getListViewMode() override;
     IUeGui::ISmsComposeMode& getSmsComposeMode() override;
     IUeGui::ITextMode& showViewTextMode() override;
+    IUeGui::ICallMode& setCallMode() override;
     void setAcceptCallback(IUeGui::Callback) override;
     void setRejectCallback(IUeGui::Callback) override;
 

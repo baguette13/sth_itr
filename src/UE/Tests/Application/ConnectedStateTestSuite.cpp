@@ -74,4 +74,29 @@ TEST_F(ConnectedStateTestSuite, shallSendSmsWhenAcceptCallbackCalled)
     acceptCallback();
 }
 
+TEST_F(ConnectedStateTestSuite, shallTransitionToReceivingCallStateOnIncomingCallRequest)
+{
+    // given
+    ConnectedState objectUnderTest{context};
+    const common::PhoneNumber CALLER_NUMBER{123};
+    
+    // These expectations are needed because ConnectedState will transition to ReceivingCallState
+    // which will call these methods in its constructor
+    NiceMock<ITextModeMock> textModeMock;
+    ON_CALL(userPortMock, showViewTextMode()).WillByDefault(ReturnRef(textModeMock));
+    
+    // expect
+    EXPECT_CALL(userPortMock, showViewTextMode());
+    EXPECT_CALL(userPortMock, setAcceptCallback(_));
+    EXPECT_CALL(userPortMock, setRejectCallback(_));
+    EXPECT_CALL(timerPortMock, startTimer(_));
+    
+    // when
+    objectUnderTest.handleCallRequest(CALLER_NUMBER);
+    
+    // Transition to ReceivingCallState happens in the implementation
+    // We can't directly verify the state change in this test structure,
+    // but the implementation should call context.setState<ReceivingCallState>(CALLER_NUMBER)
+}
+
 }
